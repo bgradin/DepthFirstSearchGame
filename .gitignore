@@ -1,8 +1,8 @@
 #Ignore everything in the bin, obj, and .git folders
-*/Debug/
-*/Release/
-*/bin/
-*/obj/
+*Debug/
+*Release/
+*bin/
+*obj/
 .git/
 
 #Ignore anything ending in .user or .suo
@@ -12,3 +12,7 @@
 *.opensdf
 *.tlog
 *.pdb
+*.xnb
+*.cachefile
+*.cache
+*Thumbs.db
