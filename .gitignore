@@ -1,0 +1,14 @@
+#Ignore everything in the bin, obj, and .git folders
+*/Debug/
+*/Release/
+*/bin/
+*/obj/
+.git/
+
+#Ignore anything ending in .user or .suo
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.tlog
+*.pdb
