@@ -16,3 +16,5 @@
 *.cachefile
 *.cache
 *Thumbs.db
+*.docx
+*.pptx

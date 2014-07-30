@@ -73,6 +73,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Net" />
+    <Reference Include="XNAControls, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\XNAControls\XNAControls.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackgroundImageRenderer.cs" />
@@ -117,10 +121,6 @@
     <ProjectReference Include="..\..\..\ServerClassLibrary\ServerClassLibrary.csproj">
       <Project>{cef84914-e316-4b29-b238-a9cfe45e3e09}</Project>
       <Name>ServerClassLibrary</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\XNAControls\XNAControls.csproj">
-      <Project>{ea2fba5a-4cca-47b8-80e1-489ffc707123}</Project>
-      <Name>XNAControls</Name>
     </ProjectReference>
     <ProjectReference Include="..\GameContent\GameContent.contentproj">
       <Name>GameContent %28Content%29</Name>
