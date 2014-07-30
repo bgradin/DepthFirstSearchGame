@@ -1,4 +1,5 @@
-﻿using GameClassLibrary;
+﻿using XNAControls;
+using GameClassLibrary;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ServerClassLibrary;

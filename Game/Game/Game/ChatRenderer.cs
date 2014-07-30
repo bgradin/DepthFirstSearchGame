@@ -43,7 +43,7 @@ namespace AnglerGameClient
 					transparent,
 					transparent
 				};
-			MessageBox = new XNATextBox(Game, new Rectangle(chatBounds.X + 15, GraphicsDevice.Viewport.Height - 20 - lineHeight, chatBackground.Width - 10, lineHeight), textboxTextures, font);
+			MessageBox = new XNATextBox(Game, new Microsoft.Xna.Framework.Rectangle(chatBounds.X + 15, GraphicsDevice.Viewport.Height - 20 - lineHeight, chatBackground.Width - 10, lineHeight), textboxTextures, "Arial", 12.0f);
 			MessageBox.TextColor = SD.Color.White;
 			Engine.Game.Components.Remove(MessageBox); // since it's automatically added
 			Engine.AnglerGame.KeyboardDispatcher.Subscriber = MessageBox;
@@ -162,6 +162,12 @@ namespace AnglerGameClient
 			}
 
 			base.Draw(gameTime);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			font.Dispose();
+			base.Dispose(disposing);
 		}
 
 		RenderTarget2D chatRenderTarget;

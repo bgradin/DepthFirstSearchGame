@@ -135,7 +135,7 @@ namespace AnglerGameClient
 			(System.Windows.Forms.Form.FromHandle(this.Window.Handle)).Visible = false;
 			try
 			{
-				World.MainPlayer = new ConnectedPlayer("192.168.1.21", 8085);
+				World.MainPlayer = new ConnectedPlayer("127.0.0.1", 8085);
 				World.MainPlayer.AddChatMessage = (message) =>
 				{
 					untexturedChatMessages.Add(DateTime.Now, message);
@@ -266,9 +266,7 @@ namespace AnglerGameClient
 
 			int screenWidth = GraphicsDevice.Viewport.Width;
 			int screenHeight = GraphicsDevice.Viewport.Height;
-
-			System.Drawing.Font font = new System.Drawing.Font("Arial", 12);
-
+			
 			Texture2D[] textboxTextures = new Texture2D[4]
 				{
 					Content.Load<Texture2D>("textboxBack"),
@@ -372,169 +370,167 @@ namespace AnglerGameClient
 			howToPlayText.Font = new SD.Font("Calibri", 16);
 			howToPlayPanel.Components.Add(howToPlayText);
 
-			XNAHyperLink backHyperlink = new XNAHyperLink(
-				this,
-				new Rectangle(3 * screenWidth / 4 - 50, screenHeight / 2 + 75, 50, 30),
-				font,
-				SD.FontStyle.Bold,
-				SD.Text.TextRenderingHint.SingleBitPerPixelGridFit);
-			backHyperlink.DrawOrder = (int)RenderOrder.UILayer;
-			backHyperlink.ForeColor = SD.Color.FromArgb(139, 95, 71);
-			backHyperlink.HighlightColor = SD.Color.FromArgb(150, 139, 95, 71);
-			backHyperlink.Text = "Back";
-			backHyperlink.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			backHyperlink.OnClick += (o, e) =>
+			using (SD.Font font = new SD.Font("Arial", 12.0f))
 			{
-				FXCollection.SoundEffects[SoundEffects.Select].Play();
-				World.GameState = GameState.PregameMenu;
-			};
-			howToPlayPanel.Components.Add(backHyperlink);
-
-			registerTBEvent = new TextBoxEvent(registerEvent);
-
-			subscribeToUsernameBox = (object sender, EventArgs e) => { usernameTextbox.Selected = true; KeyboardDispatcher.Subscriber = usernameTextbox; };
-			subscribeToPasswordBox = (object sender, EventArgs e) => { passwordTextbox.Selected = true; KeyboardDispatcher.Subscriber = passwordTextbox; };
-			subscribeToConfirmBox  = (object sender, EventArgs e) => { confirmPasswordTextbox.Selected = true; KeyboardDispatcher.Subscriber = confirmPasswordTextbox; };
-
-			// Update error message event
-			World.MainPlayer.UpdateErrorMessage += (o, e) =>
-			{
-				//close any open dialog
-				if(XNAControl.ModalDialog != null)
+				XNAHyperLink backHyperlink = new XNAHyperLink(
+					this,
+					new Rectangle(3 * screenWidth / 4 - 50, screenHeight / 2 + 75, 50, 30),
+					font,
+					SD.FontStyle.Bold,
+					SD.Text.TextRenderingHint.SingleBitPerPixelGridFit);
+				backHyperlink.DrawOrder = (int)RenderOrder.UILayer;
+				backHyperlink.ForeColor = SD.Color.FromArgb(139, 95, 71);
+				backHyperlink.HighlightColor = SD.Color.FromArgb(150, 139, 95, 71);
+				backHyperlink.Text = "Back";
+				backHyperlink.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+				backHyperlink.OnClick += (o, e) =>
 				{
-					XNAControl.ModalDialog.Close();
-				}
+					FXCollection.SoundEffects[SoundEffects.Select].Play();
+					World.GameState = GameState.PregameMenu;
+				};
+				howToPlayPanel.Components.Add(backHyperlink);
 
-				XNADialog errMsg = new XNADialog(this, e.Message, e.Caption);
-				if (!(o as ConnectedPlayer).Connected)
-					errMsg.CloseAction += (bool success) =>
-					{
-						FXCollection.SoundEffects[SoundEffects.Select].Play();
-						this.Exit();
-					};
-			};
+				registerTBEvent = new TextBoxEvent(registerEvent);
 
-			World.MainPlayer.BacteriaCollect += (o, e) =>
-			{
-				FXCollection.SoundEffects[SoundEffects.Collect].Play();
+				subscribeToUsernameBox = (object sender, EventArgs e) => { usernameTextbox.Selected = true; KeyboardDispatcher.Subscriber = usernameTextbox; };
+				subscribeToPasswordBox = (object sender, EventArgs e) => { passwordTextbox.Selected = true; KeyboardDispatcher.Subscriber = passwordTextbox; };
+				subscribeToConfirmBox = (object sender, EventArgs e) => { confirmPasswordTextbox.Selected = true; KeyboardDispatcher.Subscriber = confirmPasswordTextbox; };
 
-				overlayRenderer.RenderBacteriaCount();
-			};
+				// Update error message event
+				World.MainPlayer.UpdateErrorMessage += (o, e) =>
+				{
+					//close any open dialog
+					XNADialog errMsg = new XNADialog(this, e.Message, e.Caption);
+					if (!(o as ConnectedPlayer).Connected)
+						errMsg.CloseAction += (bool success) =>
+						{
+							FXCollection.SoundEffects[SoundEffects.Select].Play();
+							this.Exit();
+						};
+				};
 
-			// Username field
-			usernameTextbox = new XNATextBox(this, new Rectangle(screenWidth / 2 - 100, screenHeight / 2 - 70, 200, 30), textboxTextures, font);
-			usernameTextbox.DrawOrder = (int)RenderOrder.UILayer;
-			usernameTextbox.MaxChars = 30;
-			usernameTextbox.DefaultText = "Username";
-			usernameTextbox.Clicked += subscribeToUsernameBox;
-			subscribeToUsernameBox(usernameTextbox);
-			usernameTextbox.OnTabPressed += subscribeToPasswordBox;
-			loginPanel.Components.Add(usernameTextbox);
-			registerPanel.Components.Add(usernameTextbox);
+				World.MainPlayer.BacteriaCollect += (o, e) =>
+				{
+					FXCollection.SoundEffects[SoundEffects.Collect].Play();
 
-			// Password field
-			passwordTextbox = new XNATextBox(this, new Rectangle(screenWidth / 2 - 100, screenHeight / 2 - 20, 200, 30), textboxTextures, font);
-			passwordTextbox.DrawOrder = (int)RenderOrder.UILayer;
-			passwordTextbox.MaxChars = 30;
-			passwordTextbox.DefaultText = "Password";
-			passwordTextbox.PasswordBox = true;
-			passwordTextbox.Clicked += subscribeToPasswordBox;
-			loginPanel.Components.Add(passwordTextbox);
-			registerPanel.Components.Add(passwordTextbox);
+					overlayRenderer.RenderBacteriaCount();
+				};
 
-			// Confirm password field
-			confirmPasswordTextbox = new XNATextBox(this, new Rectangle(screenWidth / 2 - 100, screenHeight / 2 + 30, 200, 30), textboxTextures, font);
-			confirmPasswordTextbox.DrawOrder = (int)RenderOrder.UILayer;
-			confirmPasswordTextbox.MaxChars = 30;
-			confirmPasswordTextbox.DefaultText = "Confirm Password";
-			confirmPasswordTextbox.PasswordBox = true;
-			confirmPasswordTextbox.Clicked += subscribeToConfirmBox;
-			confirmPasswordTextbox.OnTabPressed += subscribeToUsernameBox;
-			confirmPasswordTextbox.OnEnterPressed += new TextBoxEvent(registerEvent);
-			registerPanel.Components.Add(confirmPasswordTextbox);
+				// Username field
+				usernameTextbox = new XNATextBox(this, new Rectangle(screenWidth / 2 - 100, screenHeight / 2 - 70, 200, 30), textboxTextures, "Arial", 12.0f);
+				usernameTextbox.DrawOrder = (int)RenderOrder.UILayer;
+				usernameTextbox.MaxChars = 30;
+				usernameTextbox.DefaultText = "Username";
+				usernameTextbox.Clicked += subscribeToUsernameBox;
+				subscribeToUsernameBox(usernameTextbox);
+				usernameTextbox.OnTabPressed += subscribeToPasswordBox;
+				loginPanel.Components.Add(usernameTextbox);
+				registerPanel.Components.Add(usernameTextbox);
 
-			Texture2D[] loginButtonTextures = new Texture2D[2]
+				// Password field
+				passwordTextbox = new XNATextBox(this, new Rectangle(screenWidth / 2 - 100, screenHeight / 2 - 20, 200, 30), textboxTextures, "Arial", 12.0f);
+				passwordTextbox.DrawOrder = (int)RenderOrder.UILayer;
+				passwordTextbox.MaxChars = 30;
+				passwordTextbox.DefaultText = "Password";
+				passwordTextbox.PasswordBox = true;
+				passwordTextbox.Clicked += subscribeToPasswordBox;
+				loginPanel.Components.Add(passwordTextbox);
+				registerPanel.Components.Add(passwordTextbox);
+
+				// Confirm password field
+				confirmPasswordTextbox = new XNATextBox(this, new Rectangle(screenWidth / 2 - 100, screenHeight / 2 + 30, 200, 30), textboxTextures, "Arial", 12.0f);
+				confirmPasswordTextbox.DrawOrder = (int)RenderOrder.UILayer;
+				confirmPasswordTextbox.MaxChars = 30;
+				confirmPasswordTextbox.DefaultText = "Confirm Password";
+				confirmPasswordTextbox.PasswordBox = true;
+				confirmPasswordTextbox.Clicked += subscribeToConfirmBox;
+				confirmPasswordTextbox.OnTabPressed += subscribeToUsernameBox;
+				confirmPasswordTextbox.OnEnterPressed += new TextBoxEvent(registerEvent);
+				registerPanel.Components.Add(confirmPasswordTextbox);
+
+				Texture2D[] loginButtonTextures = new Texture2D[2]
 				{
 					Content.Load<Texture2D>("button"),
 					Content.Load<Texture2D>("buttonHover")
 				};
 
-			XNAButton loginButton = new XNAButton(this,  /*, loginButtonTextures,*/ new Vector2(screenWidth / 2 + 20, screenHeight / 2 + 30), "Login");
-			loginButton.DrawOrder = (int)RenderOrder.UILayer;
-			loginButton.OnClick += new XNAButton.ButtonClickEvent(loginEvent);
-			loginPanel.Components.Add(loginButton);
+				XNAButton loginButton = new XNAButton(this,  /*, loginButtonTextures,*/ new Vector2(screenWidth / 2 + 20, screenHeight / 2 + 30), "Login");
+				loginButton.DrawOrder = (int)RenderOrder.UILayer;
+				loginButton.OnClick += new XNAButton.ButtonClickEvent(loginEvent);
+				loginPanel.Components.Add(loginButton);
 
-			XNAButton registerButton = new XNAButton(this, /*loginButtonTextures,*/ new Vector2(screenWidth / 2 + 20, screenHeight / 2 + 80), "Register");
-			registerButton.DrawOrder = (int)RenderOrder.UILayer;
-			registerButton.OnClick += new XNAButton.ButtonClickEvent(registerEvent);
-			registerPanel.Components.Add(registerButton);
+				XNAButton registerButton = new XNAButton(this, /*loginButtonTextures,*/ new Vector2(screenWidth / 2 + 20, screenHeight / 2 + 80), "Register");
+				registerButton.DrawOrder = (int)RenderOrder.UILayer;
+				registerButton.OnClick += new XNAButton.ButtonClickEvent(registerEvent);
+				registerPanel.Components.Add(registerButton);
 
-			cancelHyperlink = new XNAHyperLink(
-				this,
-				new Rectangle(screenWidth / 2 - 95, screenHeight / 2 + 80, 100, 30),
-				font,
-				SD.FontStyle.Bold,
-				SD.Text.TextRenderingHint.SingleBitPerPixelGridFit);
-			cancelHyperlink.DrawOrder = (int)RenderOrder.UILayer;
-			cancelHyperlink.ForeColor = SD.Color.FromArgb(139, 95, 71);
-			cancelHyperlink.HighlightColor = SD.Color.FromArgb(150, 139, 95, 71);
-			cancelHyperlink.Text = "Cancel";
-			cancelHyperlink.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			cancelHyperlink.OnClick += (o, e) =>
-			{
-				FXCollection.SoundEffects[SoundEffects.Select].Play(); 
-				World.GameState = GameState.PregameMenu;
-			};
-			registerPanel.Components.Add(cancelHyperlink);
-			loginPanel.Components.Add(cancelHyperlink);
-
-			// Map renderer
-			MapRenderer mapRenderer = new MapRenderer(this, World.CurrentMap);
-			inGamePanel.Components.Add(mapRenderer);
-
-			// NPC rendering engine
-			GraphicEngine npcEngine = new GraphicEngine(this, RenderOrder.NPCLayer);
-			GraphicsEngineComponent.CreateAndAdd<MinorPlayerRenderer>(npcEngine);
-			inGamePanel.Components.Add(npcEngine);
-
-			// Overlay rendering engine
-			GraphicEngine overlayEngine = new GraphicEngine(this, RenderOrder.OverlayLayer);
-			overlayRenderer = GraphicsEngineComponent.CreateAndAdd<OverlayRenderer>(overlayEngine);
-			inGamePanel.Components.Add(overlayEngine);
-
-			// Audio manager
-			inGamePanel.Components.Add(audioManager = new AudioManager(this));
-
-			// Input handler
-			InputHandler = new InputHandler(this);
-			inGamePanel.Components.Add(InputHandler);
-			InputHandler.ChatBoxClosing += (o, e) =>
-			{
-				if (ShowChatPrompt && chatRenderer.MessageBox.Text != "")
+				cancelHyperlink = new XNAHyperLink(
+					this,
+					new Rectangle(screenWidth / 2 - 95, screenHeight / 2 + 80, 100, 30),
+					font,
+					SD.FontStyle.Bold,
+					SD.Text.TextRenderingHint.SingleBitPerPixelGridFit);
+				cancelHyperlink.DrawOrder = (int)RenderOrder.UILayer;
+				cancelHyperlink.ForeColor = SD.Color.FromArgb(139, 95, 71);
+				cancelHyperlink.HighlightColor = SD.Color.FromArgb(150, 139, 95, 71);
+				cancelHyperlink.Text = "Cancel";
+				cancelHyperlink.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+				cancelHyperlink.OnClick += (o, e) =>
 				{
-					World.MainPlayer.SendToServer(ServerAction.ClientSay, new TalkData(chatRenderer.MessageBox.Text));
-					chatRenderer.MessageBox.Text = "";
-				}
-			};
-			InputHandler.RemoveTilde += () =>
-				{
-					chatRenderer.MessageBox.Text = chatRenderer.MessageBox.Text.TrimEnd('`');
+					FXCollection.SoundEffects[SoundEffects.Select].Play();
+					World.GameState = GameState.PregameMenu;
 				};
+				registerPanel.Components.Add(cancelHyperlink);
+				loginPanel.Components.Add(cancelHyperlink);
 
-			// Main Player
-			inGamePanel.Components.Add(MainPlayer = new PlayerComponent(this, World.MainPlayer));
+				// Map renderer
+				MapRenderer mapRenderer = new MapRenderer(this, World.CurrentMap);
+				inGamePanel.Components.Add(mapRenderer);
 
-			// Pause menu
-			GraphicEngine pauseMenuEngine = new GraphicEngine(this, RenderOrder.PauseMenuLayer);
-			GraphicsEngineComponent.CreateAndAdd<PauseMenuRenderer>(pauseMenuEngine);
-			inGamePanel.Components.Add(pauseMenuEngine);
+				// NPC rendering engine
+				GraphicEngine npcEngine = new GraphicEngine(this, RenderOrder.NPCLayer);
+				GraphicsEngineComponent.CreateAndAdd<MinorPlayerRenderer>(npcEngine);
+				inGamePanel.Components.Add(npcEngine);
 
-			// Chat
-			GraphicEngine chatEngine = new GraphicEngine(this, RenderOrder.ChatLayer);
-			chatRenderer = GraphicsEngineComponent.CreateAndAdd<ChatRenderer>(chatEngine);
-			inGamePanel.Components.Add(chatEngine);
+				// Overlay rendering engine
+				GraphicEngine overlayEngine = new GraphicEngine(this, RenderOrder.OverlayLayer);
+				overlayRenderer = GraphicsEngineComponent.CreateAndAdd<OverlayRenderer>(overlayEngine);
+				inGamePanel.Components.Add(overlayEngine);
 
-			World.GameState = GameState.PregameMenu;
+				// Audio manager
+				inGamePanel.Components.Add(audioManager = new AudioManager(this));
+
+				// Input handler
+				InputHandler = new InputHandler(this);
+				inGamePanel.Components.Add(InputHandler);
+				InputHandler.ChatBoxClosing += (o, e) =>
+				{
+					if (ShowChatPrompt && chatRenderer.MessageBox.Text != "")
+					{
+						World.MainPlayer.SendToServer(ServerAction.ClientSay, new TalkData(chatRenderer.MessageBox.Text));
+						chatRenderer.MessageBox.Text = "";
+					}
+				};
+				InputHandler.RemoveTilde += () =>
+					{
+						chatRenderer.MessageBox.Text = chatRenderer.MessageBox.Text.TrimEnd('`');
+					};
+
+				// Main Player
+				inGamePanel.Components.Add(MainPlayer = new PlayerComponent(this, World.MainPlayer));
+
+				// Pause menu
+				GraphicEngine pauseMenuEngine = new GraphicEngine(this, RenderOrder.PauseMenuLayer);
+				GraphicsEngineComponent.CreateAndAdd<PauseMenuRenderer>(pauseMenuEngine);
+				inGamePanel.Components.Add(pauseMenuEngine);
+
+				// Chat
+				GraphicEngine chatEngine = new GraphicEngine(this, RenderOrder.ChatLayer);
+				chatRenderer = GraphicsEngineComponent.CreateAndAdd<ChatRenderer>(chatEngine);
+				inGamePanel.Components.Add(chatEngine);
+
+				World.GameState = GameState.PregameMenu;
+			}
 		}
 
 		protected override void UnloadContent()
@@ -678,7 +674,7 @@ namespace AnglerGameClient
 			}
 
 			//We have an in-game dialog (for teh winz) change the mouse visibility. If a dialog is open, DON'T CHANGE IT BACK!
-			if (XNADialog.ModalDialog == null)
+			if (XNADialog.ModalDialogs != null && XNADialog.ModalDialogs.Count == 0)
 			{
 				IsMouseVisible = World.GameState == GameState.Login
 					|| World.GameState == GameState.Register

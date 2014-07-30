@@ -1,4 +1,4 @@
-﻿using GameClassLibrary;
+﻿using XNAControls;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
