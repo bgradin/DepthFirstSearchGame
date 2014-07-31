@@ -51,20 +51,33 @@ namespace ServerClassLibrary
 
 				string bindAddr;
 				int port;
-				m_config.GetValue("server", "bindaddress", out bindAddr);
-				m_config.GetValue("server", "port", out port);
+				m_config.GetValue(ConfigConst.CONF_SERVER, ConfigConst.CONF_SERVER_BIND_ADDR, out bindAddr);
+				m_config.GetValue(ConfigConst.CONF_SERVER, ConfigConst.CONF_SERVER_PORT, out port);
 
-				m_endPoint = new IPEndPoint(IPAddress.Parse(bindAddr), port);
-				m_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				bool dual; 
+				if (m_config.GetValue(ConfigConst.CONF_SERVER, ConfigConst.CONF_SERVER_DUAL, out dual) && dual)
+				{
+					m_endPoint = new IPEndPoint(IPAddress.Parse(bindAddr), port);
+					if (m_endPoint.Address.AddressFamily == AddressFamily.InterNetwork)
+						throw new Exception("Unable to use dual-mode communication when binding to IPv4 address. Dual-mode requires use of an IPv6 address for binding.");
+					m_sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+					m_sock.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, 0);
+				}
+				else
+				{
+					m_endPoint = new IPEndPoint(IPAddress.Parse(bindAddr), port);
+					m_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				}
+
 				m_started = false;
 				m_termSig = false;
 				m_players = new List<ConnectedPlayer>();
 				
 				m_database = new DB();
 				string dbu, dbp, dbh;
-				m_config.GetValue("database", "dbuser", out dbu);
-				m_config.GetValue("database", "dbpass", out dbp);
-				m_config.GetValue("database", "dbaddr", out dbh);
+				m_config.GetValue(ConfigConst.CONF_DB, ConfigConst.CONF_DB_USER, out dbu);
+				m_config.GetValue(ConfigConst.CONF_DB, ConfigConst.CONF_DB_PASS, out dbp);
+				m_config.GetValue(ConfigConst.CONF_DB, ConfigConst.CONF_DB_ADDR, out dbh);
 				if (!m_database.Connect(dbu, dbp, dbh)) //Use http://dev.mysql.com/downloads/file.php?id=450594 for connector
 				{
 					m_log.LogError(System.Reflection.MethodBase.GetCurrentMethod().Name,
@@ -173,11 +186,19 @@ namespace ServerClassLibrary
 			try
 			{
 				//terminate the 'accept' thread by connecting to it and unblocking the call
-				using (Socket killer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+				Socket killer;
+				if (this.m_endPoint.AddressFamily == AddressFamily.InterNetworkV6)
 				{
-					killer.Connect("127.0.0.1", this.m_endPoint.Port);
-					killer.Shutdown(SocketShutdown.Both);
+					killer = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+					killer.Connect("::1", this.m_endPoint.Port);
 				}
+				else
+				{
+					killer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+					killer.Connect("127.0.0.1", this.m_endPoint.Port);
+				}
+				killer.Shutdown(SocketShutdown.Both);
+				killer.Close();
 
 				m_sock.Close();
 				m_sock.Dispose();

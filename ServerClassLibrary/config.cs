@@ -22,6 +22,11 @@ namespace ServerClassLibrary
 		public static string CONF_GAME_START_MAP = "startmap";
 		public static string CONF_GAME_START_X = "startx";
 		public static string CONF_GAME_START_Y = "starty";
+
+		public static string CONF_SERVER = "server";
+		public static string CONF_SERVER_BIND_ADDR = "bindaddress";
+		public static string CONF_SERVER_PORT = "port";
+		public static string CONF_SERVER_DUAL = "dualmode";
 	}
 
 	public class Config
@@ -280,6 +285,10 @@ namespace ServerClassLibrary
 				sw.WriteLine("startmap(int)=");
 				sw.WriteLine("startx(int)=");
 				sw.WriteLine("starty(int)=");
+				sw.WriteLine("[{0}]", ConfigConst.CONF_SERVER);
+				sw.WriteLine(ConfigConst.CONF_SERVER_BIND_ADDR + "(string)=");
+				sw.WriteLine(ConfigConst.CONF_SERVER_PORT + "(int)=");
+				sw.WriteLine(ConfigConst.CONF_SERVER_DUAL + "(bool)=");
 				sw.Close();
 			}
 			catch

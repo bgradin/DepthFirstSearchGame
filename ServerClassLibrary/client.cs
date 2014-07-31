@@ -45,18 +45,35 @@ namespace ServerClassLibrary
 		public Socket GetSocket() { return this.m_sock; }
 
 		//construct from host/port
-		public Client(string host, int port)
+		public Client(string host, int port, bool dualMode = false)
 		{
 			IPAddress ip;
 			if (!IPAddress.TryParse(host, out ip))
 			{
-				throw new ClientCreateException("[in Client.Constructor] Unable to create client");
+				throw new ClientCreateException("[in Client.Constructor] Unable to parse ip address!");
 			}
 
-			m_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-			m_sock.Connect(host, port);
+			if (dualMode)
+			{
+				m_sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+				m_sock.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, 0);
+				if(ip.AddressFamily == AddressFamily.InterNetwork)
+				{
+					ip = ip.MapToIPv6();
+					if (ip.AddressFamily != AddressFamily.InterNetworkV6 || !ip.IsIPv4MappedToIPv6()) //these are extension methods beceause .NET 4.0 doesn't have them :(
+						throw new ClientCreateException("[in Client.Constructor] Unable to map IPv4 address to IPv6");
+
+					m_sock.Connect(ip, port);
+				}
+			}
+			else
+			{
+				m_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				m_sock.Connect(ip, port);
+			}
+
 			if (!m_sock.Connected)
-				throw new ClientConnectException("[in Client.Constructor] Unable to connect to PokeServer!");
+				throw new ClientConnectException("[in Client.Constructor] Unable to connect to Server!");
 		}
 
 		//construct from an already created socket

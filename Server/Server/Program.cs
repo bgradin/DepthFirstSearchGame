@@ -82,6 +82,11 @@ namespace GameServer
 				Console.WriteLine("Setting default config value loggedinusers=50");
 				m_serverConf.Add("general", "loggedinusers", 50);
 			}
+			if(!m_serverConf.GetValue(ConfigConst.CONF_SERVER, ConfigConst.CONF_SERVER_DUAL, out oBool))
+			{
+				Console.WriteLine("Setting default config value dualmode=false");
+				m_serverConf.Add(ConfigConst.CONF_SERVER, ConfigConst.CONF_SERVER_DUAL, false);
+			}
 			if (!m_serverConf.GetValue("server", "bindaddress", out oStr))
 			{
 				Console.WriteLine("Setting default config value bindaddress=0.0.0.0");
@@ -168,7 +173,12 @@ namespace GameServer
 					return;
 				}
 				else
-					Console.WriteLine("Server started. Listening on: {0}:{1}\n", server.ListenIP, server.ListenPort);
+				{
+					if(IPAddress.Parse(server.ListenIP).AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+						Console.WriteLine("Server started. Listening on: {0}:{1}\n", server.ListenIP, server.ListenPort);
+					else
+						Console.WriteLine("Server started. Listening on: [{0}]:{1}\n", server.ListenIP, server.ListenPort);
+				}
 			}
 			catch (Exception ex)
 			{
