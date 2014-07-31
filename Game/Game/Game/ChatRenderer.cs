@@ -166,7 +166,8 @@ namespace AnglerGameClient
 
 		protected override void Dispose(bool disposing)
 		{
-			font.Dispose();
+			if(font != null)
+				font.Dispose();
 			base.Dispose(disposing);
 		}
 

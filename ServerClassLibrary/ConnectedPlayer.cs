@@ -72,10 +72,10 @@ namespace ServerClassLibrary
 
 		public Action<ChatMessage> AddChatMessage { get; set; }
 
-		public ConnectedPlayer(string host, int port) //constructed from client side
+		public ConnectedPlayer(string host, int port, bool dualmode = false) //constructed from client side
 			: base("", -1, -1, -1, 0)
 		{
-			connection = new Client(host, port);
+			connection = new Client(host, port, dualmode);
 			connection.ReceiveFromServer(this);
 			loggedIn = false;
 		}
